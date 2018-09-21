@@ -1,2 +1,2 @@
 # Vue.js_Project
-parts of the Cryptocurrency market website that I made
+parts of the Cryptocurrency market website that I had participated
