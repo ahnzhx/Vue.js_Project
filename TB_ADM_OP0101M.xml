@@ -1,0 +1,143 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bitplus.btsapi.mapper.TB_ADM_OP0101M">
+    <resultMap id="questMap" type="com.bitplus.btsapi.model.ContactUsVo">
+        <result column="MMBR_NMBR" property="mmbrNmbr"/>
+        <result column="QUEST_SEQ" property="questSeq"/>
+        <result column="QUEST_SECTN_CD" property="questSectnCd"/>
+        <result column="QUEST_TIT" property="questTit"/>
+        <result column="QUEST_CTNT" property="questCtnt"/>
+        <result column="ANSER_CTNT" property="anserCtnt"/>
+        <result column="RG_DT" property="rgDt"/>
+        <result column="EDT_DT" property="edtDt"/>
+        <result column="RGT" property="rgt"/>
+        <result column="EDR" property="edr"/>
+        <result column="PAGE" property="page"/>
+        <result column="MAX_PAGE" property="maxPage"/>
+        <result column="TOTAL_ROWS" property="totalRows"/>
+        <result column="RN" property="rn"/>
+    </resultMap>
+
+    <resultMap id="noticeMap" type="com.bitplus.btsapi.model.NoticeVo">
+        <result column = "NOTC_SEQ" property="notcSeq"/>
+        <result column = "NOTC_TIT" property="notcTit"/>
+        <result column = "NOTC_CTNT" property="notcCtnt"/>
+        <result column="RG_DT" property="rgDt"/>
+        <result column="EDT_DT" property="edtDt"/>
+        <result column="RGT" property="rgt"/>
+        <result column="EDR" property="edr"/>
+        <result column = "SRCH_CNT" property="srchCnt"/>
+        <result column = "NOTC_YN" property="notcYn"/>
+        <result column = "PAGE" property="page"/>
+        <result column = "NOTC_SECTN_CD" property="notcSectnCd"/>
+        <result column = "NOTC_SECTN_NM" property="notcSectnNm"/>
+    </resultMap>
+
+    <select id ="getNList" resultMap="noticeMap">
+        SELECT a.PAGE
+             , a.NOTC_SEQ
+             , a.NOTC_TIT
+             , a.RG_DT
+             , a.SRCH_CNT
+             , NOTC_YN
+             , NOTC_SECTN_CD
+             ,(SELECT CD_NM
+                 FROM bitplus.TB_BTS_CM0101D
+                WHERE GRUP_CD = 'NOTC_SECTN_CD'
+                  AND CD =  NOTC_SECTN_CD) AS NOTC_SECTN_NM
+         FROM (SELECT NOTC_SEQ
+                    , floor(((@ROWNUM := @ROWNUM + 1)-1)/10) + 1 AS PAGE
+                    , NOTC_TIT
+                    , RG_DT
+                    , SRCH_CNT
+                    , NOTC_YN
+                    , NOTC_SECTN_CD
+                 FROM bitplus_admin.TB_ADM_OP0101M, (select @ROWNUM := 0) A
+                WHERE NOTC_YN = 'N'
+                <if test = "schWord != null">
+                  AND NOTC_TIT LIKE CONCAT('%', #{schWord}, '%')
+                   OR NOTC_CTNT LIKE CONCAT('%', #{schWord}, '%')
+                </if>
+             ORDER BY NOTC_SEQ DESC ) a
+                WHERE PAGE = #{page}
+    </select>
+
+    <select id="getYList" resultMap="noticeMap">
+        SELECT NOTC_SEQ
+             , NOTC_TIT
+             , RG_DT
+             , SRCH_CNT
+             , NOTC_YN
+             , NOTC_SECTN_CD
+          FROM bitplus_admin.TB_ADM_OP0101M
+         WHERE NOTC_YN = 'Y'
+         <if test = "notcSectnCd != null">
+           AND NOTC_SECTN_CD = #{notcSectnCd}
+         </if>
+      ORDER BY NOTC_SEQ DESC
+    </select>
+
+
+    <select id="getYListOnly" resultMap="noticeMap">
+        SELECT NOTC_SEQ
+             , NOTC_TIT
+             , RG_DT
+             , SRCH_CNT
+             , NOTC_YN
+             , NOTC_SECTN_CD
+             ,(SELECT CD_NM
+                 FROM bitplus.TB_BTS_CM0101D
+                WHERE GRUP_CD = 'NOTC_SECTN_CD'
+                  AND CD =  NOTC_SECTN_CD) AS NOTC_SECTN_NM
+         FROM bitplus_admin.TB_ADM_OP0101M
+        WHERE NOTC_YN = 'Y'
+        <if test = "notcSectnCd != null">
+          AND NOTC_SECTN_CD = #{notcSectnCd}
+        </if>
+     ORDER BY NOTC_SEQ DESC LIMIT 1
+    </select>
+
+    <select id="getNoticeMaxPage" resultMap="noticeMap">
+        SELECT ifnull(max(page), 1) as maxPage
+          FROM (SELECT row_number() over() AS rn
+                     , floor((row_number() over()-1)/10) + 1 AS page
+                     , NOTC_TIT
+                  FROM bitplus_admin.TB_ADM_OP0101M
+                 WHERE NOTC_YN = 'N'
+                 <if test="schWord != null">
+                   AND NOTC_TIT LIKE CONCAT('%', #{schWord}, '%')
+                    OR NOTC_CTNT LIKE CONCAT('%', #{schWord}, '%')
+                 </if>
+                ) a
+    </select>
+
+    <update id="updateSrchCnt">
+          UPDATE bitplus_admin.TB_ADM_OP0101M
+             SET SRCH_CNT = (SRCH_CNT + 1)
+           WHERE NOTC_SEQ = #{notcSeq}
+    </update>
+
+    <select id="getNoticeView" resultMap="noticeMap">
+        SELECT a.PAGE
+             , a.NOTC_SEQ
+             , a.NOTC_TIT
+             , a.NOTC_CTNT
+             , a.RG_DT
+             , a.SRCH_CNT
+             ,(SELECT CD_NM
+                 FROM bitplus.TB_BTS_CM0101D
+                WHERE GRUP_CD = 'NOTC_SECTN_CD'
+                  AND CD = NOTC_SECTN_CD ) AS NOTC_SECTN_NM
+          FROM (SELECT NOTC_SEQ
+                     , floor(((@ROWNUM := @ROWNUM + 1)-1)/10) + 1 AS page
+                     , NOTC_TIT
+                     , NOTC_CTNT
+                     , RG_DT
+                     , SRCH_CNT
+                     , NOTC_SECTN_CD
+                  FROM bitplus_admin.TB_ADM_OP0101M, (select @ROWNUM := 0) A
+                 WHERE NOTC_YN = 'N' ) a
+         WHERE NOTC_SEQ = #{notcSeq}
+    </select>
+</mapper>
