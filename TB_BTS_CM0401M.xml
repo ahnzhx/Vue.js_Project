@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bitplus.btsapi.mapper.TB_BTS_CM0401M">
+    <resultMap id="fileMap" type="com.bitplus.btsapi.model.FileVo">
+        <result column="MMBR_NMBR" property="mmbrNmbr"/>
+        <result column="DOC_SUB_SECTN_CD" property="docSubSectnCd"/>
+        <result column="DOC_SUB_FILE_SECTN_CD" property="docSubFileSectnCd"/>
+        <result column="FILE_PATH" property="filePath"/>
+        <result column="ORGNL_FILE_NM" property="orgnlFileNm"/>
+        <result column="SAVE_FILE_NM" property="saveFileNm"/>
+        <result column="RG_DT" property="rgDt"/>
+        <result column="EDT_DT" property="edtDt"/>
+        <result column="RGT" property="rgt"/>
+        <result column="EDR" property="edr"/>
+    </resultMap>
+
+    <insert id="fileInsert" parameterType="com.bitplus.btsapi.model.FileVo">
+        INSERT INTO bitplus.TB_BTS_CM0401M
+        (
+        MMBR_NMBR,
+        DOC_SUB_SECTN_CD,
+        DOC_SUB_FILE_SECTN_CD,
+        FILE_PATH,
+        ORGNL_FILE_NM,
+        SAVE_FILE_NM,
+        RG_DT
+        ) VALUE (
+        #{mmbrNmbr},
+        #{docSubSectnCd},
+        #{docSubFileSectnCd},
+        #{filePath},
+        #{orgnlFileNm},
+        #{saveFileNm},
+        NOW()
+        )
+    </insert>
+
+</mapper>
