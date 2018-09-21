@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bitplus.btsapi.mapper.TB_BTS_CM0502M">
+
+    <resultMap id="tbBtsCm0502mMap" type="com.bitplus.btsapi.model.FaqVo">
+        <result column="FREQ_QUE_SEQ" property="freqQueSeq"/>
+        <result column="FREQ_QUE_SECTN_CD" property="freqQueSectnCd"/>
+        <result column="QUE_NM" property="queNm"/>
+        <result column="ANSER_CTNT" property="anserCtnt"/>
+    </resultMap>
+
+    <select id="getFaqList" resultMap="tbBtsCm0502mMap">
+        SELECT QUE_NM,
+               ANSER_CTNT,
+               FREQ_QUE_SEQ,
+               FREQ_QUE_SECTN_CD
+          FROM bitplus_admin.tb_bts_cm0502m
+          <if test="freqQueSectnCd != null">
+         WHERE FREQ_QUE_SECTN_CD = #{freqQueSectnCd}
+          </if>
+
+    </select>
+
+    <select id="searchFaq" resultMap="tbBtsCm0502mMap">
+        SELECT QUE_NM,
+               ANSER_CTNT,
+               FREQ_QUE_SEQ,
+               FREQ_QUE_SECTN_CD
+          FROM bitplus_admin.tb_bts_cm0502m
+         WHERE 1=1
+        <if test="schWord != null">
+         and QUE_NM OR ANSER_CTNT  LIKE CONCAT('%', #{schWord}, '%')
+        </if>
+    </select>
+</mapper>
